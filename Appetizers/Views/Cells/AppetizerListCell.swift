@@ -24,7 +24,7 @@ struct AppetizerListCell: View {
                     .font(.title2)
                     .fontWeight(.medium)
                 
-                Text("\(appetizer.price, specifier: "%.2f")")
+                Text("$\(appetizer.price, specifier: "%.2f")")
                     .foregroundColor(.secondary)
                     .fontWeight(.semibold)
             }
