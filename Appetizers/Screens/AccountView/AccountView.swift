@@ -10,14 +10,29 @@ import SwiftUI
 struct AccountView: View {
     
     @StateObject var viewModel = AccountViewModel()
+    @FocusState private var focusedTextField: FormTextField?
+    
+    enum FormTextField {
+        case firstName, lastName, email
+    }
     
     var body: some View {
         NavigationView{
             Form{
                 Section(header: Text("Personal Info")) {
                     TextField("First Name", text: $viewModel.user.firstName)
+                        .focused($focusedTextField, equals: .firstName)
+                        .onSubmit { focusedTextField = .lastName }
+                        .submitLabel(.next)
+                    
                     TextField("Lase Name", text: $viewModel.user.lastName)
+                        .focused($focusedTextField, equals: .lastName)
+                        .onSubmit { focusedTextField = .email }
+                        .submitLabel(.next)
+                    
                     TextField("Email", text: $viewModel.user.email)
+                        .focused($focusedTextField, equals: .email)
+                        .onSubmit { focusedTextField = nil } // no longer focuses on something, avails the return button in keyboard.
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
@@ -37,6 +52,11 @@ struct AccountView: View {
                 
             }
             .navigationTitle("Account")
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button("Dismiss") { focusedTextField = nil }
+                }
+            }
         }
         .onAppear {
             viewModel.retrieveUser()
