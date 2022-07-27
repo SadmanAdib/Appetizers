@@ -11,37 +11,62 @@ struct AppetizerListView: View {
     
     @StateObject var viewModel = AppetizerListViewModel()
     
-    
     var body: some View {
-        ZStack{
-            NavigationView{
-                List(viewModel.appetizers){ appetizer in
-                   AppetizerListCell(appetizer: appetizer)
-                        .onTapGesture {
-                            viewModel.selectedAppetizer = appetizer
-                            viewModel.isShowingDetailView = true
-                        }
-                       
+        VStack {
+            HStack {
+                Text(viewModel.userLocation == nil ? "Locating..." : "Deliver To")
+                
+                Text(viewModel.userAddress)
+                    .font(.caption)
+                    .fontWeight(.heavy)
+                    .foregroundColor(.brandPrimary)
+            }
+            ZStack{
+                NavigationView{
+                    List(viewModel.appetizers){ appetizer in
+                        AppetizerListCell(appetizer: appetizer)
+                            .onTapGesture {
+                                viewModel.selectedAppetizer = appetizer
+                                viewModel.isShowingDetailView = true
+                            }
+                        
+                    }
+                    .listStyle(.plain)
+                    .navigationTitle("Appetizers")
+                    .disabled(viewModel.isShowingDetailView)
                 }
-                .listStyle(.plain)
-                .navigationTitle("Appetizers")
-                .disabled(viewModel.isShowingDetailView)
+                .task {
+                    viewModel.getAppetizers()
+                }
+                .blur(radius: viewModel.isShowingDetailView ? 20 : 0)
+                
+                if viewModel.isShowingDetailView {
+                    AppetizerDetailView(appetizer: viewModel.selectedAppetizer!, isShowingDetailView: $viewModel.isShowingDetailView)
+                }
+                
+                if viewModel.isLoading {
+                    LoadingView()
+                }
+                
+                if viewModel.noLocation{
+                    Text("Please enable location in settings to continue...")
+                        .foregroundColor(.black)
+                        .frame(width: UIScreen.main.bounds.width - 100, height: 120)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.opacity(0.3).ignoresSafeArea())
+                }
+
             }
-            .task {
-                viewModel.getAppetizers()
-            }
-            .blur(radius: viewModel.isShowingDetailView ? 20 : 0)
-            
-            if viewModel.isShowingDetailView {
-                AppetizerDetailView(appetizer: viewModel.selectedAppetizer!, isShowingDetailView: $viewModel.isShowingDetailView)
-            }
-            
-            if viewModel.isLoading {
-                LoadingView()
+            .alert(item: $viewModel.alertItem) { alertItem in
+                Alert(title: alertItem.title, message: alertItem.message, dismissButton: alertItem.dismissButton)
             }
         }
-        .alert(item: $viewModel.alertItem) { alertItem in
-            Alert(title: alertItem.title, message: alertItem.message, dismissButton: alertItem.dismissButton)
+        .onAppear {
+            //calling location delegate
+            viewModel.locationManager.delegate = viewModel
+            viewModel.locationManager.requestWhenInUseAuthorization()
         }
     }
 }
