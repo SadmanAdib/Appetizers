@@ -38,7 +38,7 @@ struct AppetizerListView: View {
                 .task {
                     viewModel.getAppetizers()
                 }
-                .blur(radius: viewModel.isShowingDetailView ? 20 : 0)
+                .blur(radius: viewModel.isShowingDetailView || viewModel.noLocation ? 20 : 0)
                 
                 if viewModel.isShowingDetailView {
                     AppetizerDetailView(appetizer: viewModel.selectedAppetizer!, isShowingDetailView: $viewModel.isShowingDetailView)
@@ -47,17 +47,6 @@ struct AppetizerListView: View {
                 if viewModel.isLoading {
                     LoadingView()
                 }
-                
-                if viewModel.noLocation{
-                    Text("Please enable location in settings to continue...")
-                        .foregroundColor(.black)
-                        .frame(width: UIScreen.main.bounds.width - 100, height: 120)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.black.opacity(0.3).ignoresSafeArea())
-                }
-
             }
             .alert(item: $viewModel.alertItem) { alertItem in
                 Alert(title: alertItem.title, message: alertItem.message, dismissButton: alertItem.dismissButton)

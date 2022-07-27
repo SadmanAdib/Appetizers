@@ -20,7 +20,7 @@ import CoreLocation
     @Published var locationManager = CLLocationManager()
     @Published var userLocation: CLLocation!
     @Published var userAddress = ""
-    @Published var noLocation = false
+    @Published var noLocation = true
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         
@@ -34,10 +34,9 @@ import CoreLocation
             print("denied")
             self.noLocation = true
         default:
-            self.noLocation = false
             print("unknown")
             //direct call
-           // locationManager.requestWhenInUseAuthorization()
+            //locationManager.requestWhenInUseAuthorization()
         }
     }
     
@@ -101,7 +100,6 @@ import CoreLocation
         isLoading = true
         
         Task {
-            
             do {
                 appetizers = try await NetworkManager.shared.getAppetizers() // if here error is thrown (referencing to the NetworkManager) then it goes to the catch block
                 isLoading = false
